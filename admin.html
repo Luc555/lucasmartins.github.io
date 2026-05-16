@@ -1,254 +1,122 @@
-/* ================================================================
-   admin.js — painel admin protegido por senha
-   ================================================================ */
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Lucas Martins</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/admin.css" />
+</head>
+<body>
 
-/* ── SUPABASE (service key) ──────────────────────────────────── */
-function hdrs() {
-  return {
-    "Content-Type":  "application/json",
-    "apikey":        CONFIG.supabaseServiceKey,
-    "Authorization": `Bearer ${CONFIG.supabaseServiceKey}`,
-    "Prefer":        "return=representation",
-  };
-}
-
-async function dbGet(table, qs = "") {
-  const r = await fetch(`${CONFIG.supabaseUrl}/rest/v1/${table}?${qs}`, { headers: hdrs() });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-async function dbInsert(table, data) {
-  const r = await fetch(`${CONFIG.supabaseUrl}/rest/v1/${table}`, {
-    method: "POST", headers: hdrs(), body: JSON.stringify(data),
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-async function dbUpdate(table, id, data) {
-  const r = await fetch(`${CONFIG.supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
-    method: "PATCH", headers: hdrs(), body: JSON.stringify(data),
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-async function dbDelete(table, id) {
-  const r = await fetch(`${CONFIG.supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
-    method: "DELETE",
-    headers: { ...hdrs(), "Prefer": "return=minimal" },
-  });
-  if (!r.ok) throw new Error(await r.text());
-}
-
-/* ── STATE ───────────────────────────────────────────────────── */
-let projects  = [];
-let editingId = null;
-
-/* ── DOM ─────────────────────────────────────────────────────── */
-const $ = id => document.getElementById(id);
-
-const loginScreen   = $("login-screen");
-const adminPanel    = $("admin-panel");
-const passwordInput = $("password-input");
-const loginBtn      = $("login-btn");
-const loginError    = $("login-error");
-const logoutBtn     = $("logout-btn");
-const projectsList  = $("projects-list");
-const newBtn        = $("new-project-btn");
-const formPanel     = $("form-panel");
-const formTitle     = $("form-title");
-const cancelBtn     = $("cancel-btn");
-const saveBtn       = $("save-btn");
-const saveStatus    = $("save-status");
-const contactsList  = $("contacts-list");
-
-/* ── LOGIN ───────────────────────────────────────────────────── */
-if (sessionStorage.getItem("admin_ok") === "1") {
-  showPanel();
-}
-
-loginBtn.addEventListener("click", () => {
-  if (passwordInput.value === CONFIG.adminPassword) {
-    sessionStorage.setItem("admin_ok", "1");
-    loginError.textContent = "";
-    showPanel();
-  } else {
-    loginError.textContent = "Senha incorreta.";
-    passwordInput.value    = "";
-    passwordInput.focus();
-  }
-});
-
-passwordInput.addEventListener("keydown", e => { if (e.key === "Enter") loginBtn.click(); });
-
-logoutBtn.addEventListener("click", () => {
-  sessionStorage.removeItem("admin_ok");
-  location.reload();
-});
-
-function showPanel() {
-  loginScreen.style.display = "none";
-  adminPanel.style.display  = "block";
-  loadAll();
-}
-
-/* ── LOAD ────────────────────────────────────────────────────── */
-async function loadAll() {
-  await Promise.all([loadProjects(), loadContacts()]);
-}
-
-async function loadProjects() {
-  try {
-    projects = await dbGet("projects", "order=created_at.asc");
-    renderList();
-  } catch (e) {
-    projectsList.innerHTML = `<p class="adm-error">Erro: ${e.message}</p>`;
-  }
-}
-
-async function loadContacts() {
-  try {
-    const contacts = await dbGet("contacts", "order=created_at.desc");
-    renderContacts(contacts);
-  } catch (e) {
-    contactsList.innerHTML = `<p class="adm-error">Erro: ${e.message}</p>`;
-  }
-}
-
-/* ── PROJECTS LIST ───────────────────────────────────────────── */
-function renderList() {
-  if (!projects.length) {
-    projectsList.innerHTML = `<p class="adm-empty">Nenhum projeto. Clique em "Novo projeto".</p>`;
-    return;
-  }
-  projectsList.innerHTML = projects.map(p => `
-    <div class="proj-row">
-      <div class="proj-row-info">
-        <span class="proj-row-title">${p.title}</span>
-        <span class="proj-row-meta">${(p.tags||[]).join(" · ")} &nbsp;|&nbsp; ${p.folder}</span>
-      </div>
-      <div class="proj-row-btns">
-        <button class="adm-btn-edit" data-id="${p.id}">Editar</button>
-        <button class="adm-btn-del"  data-id="${p.id}">Excluir</button>
-      </div>
+  <!-- ── LOGIN ─────────────────────────────────────────────── -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">LM<span class="dot">.</span></div>
+      <h1 class="login-title">Admin</h1>
+      <input
+        type="password"
+        id="password-input"
+        class="adm-input"
+        placeholder="Senha"
+        autocomplete="current-password"
+      />
+      <button id="login-btn" class="adm-btn-primary">Entrar</button>
+      <p id="login-error" class="adm-error-msg"></p>
     </div>
-  `).join("");
+  </div>
 
-  projectsList.querySelectorAll(".adm-btn-edit").forEach(b =>
-    b.addEventListener("click", () => openForm(+b.dataset.id))
-  );
-  projectsList.querySelectorAll(".adm-btn-del").forEach(b =>
-    b.addEventListener("click", () => deleteProject(+b.dataset.id))
-  );
-}
+  <!-- ── ADMIN PANEL ───────────────────────────────────────── -->
+  <div id="admin-panel" style="display:none">
 
-/* ── DELETE ──────────────────────────────────────────────────── */
-async function deleteProject(id) {
-  const p = projects.find(p => p.id === id);
-  if (!confirm(`Excluir "${p.title}"?`)) return;
-  try {
-    await dbDelete("projects", id);
-    await loadProjects();
-    closeForm();
-  } catch (e) {
-    alert("Erro ao excluir: " + e.message);
-  }
-}
-
-/* ── FORM ────────────────────────────────────────────────────── */
-newBtn.addEventListener("click",    () => openForm(null));
-cancelBtn.addEventListener("click", closeForm);
-
-function openForm(id) {
-  editingId = id;
-  saveStatus.textContent    = "";
-  saveStatus.className      = "adm-status";
-  formTitle.textContent     = id ? "Editar projeto" : "Novo projeto";
-
-  if (id) {
-    const p = projects.find(p => p.id === id);
-    $("f-title").value       = p.title;
-    $("f-description").value = p.description;
-    $("f-tags").value        = (p.tags  || []).join(", ");
-    $("f-github").value      = p.github;
-    $("f-live").value        = p.live   || "";
-    $("f-folder").value      = p.folder;
-    $("f-photos").value      = (p.photos|| []).join(", ");
-  } else {
-    ["f-title","f-description","f-tags","f-github","f-live","f-folder","f-photos"]
-      .forEach(id => $(id).value = "");
-  }
-
-  formPanel.style.display = "block";
-  formPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-  $("f-title").focus();
-}
-
-function closeForm() {
-  formPanel.style.display = "none";
-  editingId = null;
-}
-
-function getFormData() {
-  return {
-    title:       $("f-title").value.trim(),
-    description: $("f-description").value.trim(),
-    tags:        $("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),
-    github:      $("f-github").value.trim(),
-    live:        $("f-live").value.trim() || null,
-    folder:      $("f-folder").value.trim(),
-    photos:      $("f-photos").value.split(",").map(t=>t.trim()).filter(Boolean),
-  };
-}
-
-saveBtn.addEventListener("click", async () => {
-  const data = getFormData();
-
-  if (!data.title || !data.description || !data.github || !data.folder) {
-    saveStatus.textContent = "Preencha título, descrição, GitHub e pasta.";
-    saveStatus.className   = "adm-status err";
-    return;
-  }
-
-  saveBtn.textContent    = "Salvando…";
-  saveBtn.disabled       = true;
-  saveStatus.textContent = "";
-
-  try {
-    if (editingId) {
-      await dbUpdate("projects", editingId, data);
-    } else {
-      await dbInsert("projects", data);
-    }
-    saveStatus.textContent = "Salvo com sucesso!";
-    saveStatus.className   = "adm-status ok";
-    await loadProjects();
-    setTimeout(closeForm, 800);
-  } catch (e) {
-    saveStatus.textContent = "Erro: " + e.message;
-    saveStatus.className   = "adm-status err";
-  } finally {
-    saveBtn.textContent = "Salvar projeto";
-    saveBtn.disabled    = false;
-  }
-});
-
-/* ── CONTACTS LIST ───────────────────────────────────────────── */
-function renderContacts(contacts) {
-  if (!contacts.length) {
-    contactsList.innerHTML = `<p class="adm-empty">Nenhuma mensagem ainda.</p>`;
-    return;
-  }
-  contactsList.innerHTML = contacts.map(c => `
-    <div class="contact-row">
-      <div class="contact-header">
-        <span class="contact-name">${c.name}</span>
-        <span class="contact-email">${c.email}</span>
-        <span class="contact-date">${new Date(c.created_at).toLocaleDateString("pt-BR")}</span>
+    <header class="adm-header">
+      <span class="adm-header-logo">LM<span class="dot">.</span> Admin</span>
+      <div class="adm-header-right">
+        <a href="index.html" class="adm-link">← Ver site</a>
+        <button id="logout-btn" class="adm-btn-ghost">Sair</button>
       </div>
-      <p class="contact-msg">${c.message}</p>
-    </div>
-  `).join("");
-}
+    </header>
+
+    <main class="adm-main">
+
+      <!-- PROJETOS -->
+      <section class="adm-section">
+        <div class="adm-section-header">
+          <h2 class="adm-section-title">Projetos</h2>
+          <button id="new-project-btn" class="adm-btn-primary">+ Novo projeto</button>
+        </div>
+
+        <div id="projects-list" class="adm-list"></div>
+
+        <!-- FORMULÁRIO (oculto por padrão) -->
+        <div id="form-panel" class="adm-form-panel" style="display:none">
+          <h3 id="form-title" class="adm-form-title">Novo projeto</h3>
+
+          <div class="adm-form-grid">
+
+            <div class="adm-field">
+              <label for="f-title">Título <span class="req">*</span></label>
+              <input id="f-title" class="adm-input" type="text" placeholder="Ex: Task Manager" />
+            </div>
+
+            <div class="adm-field adm-field-full">
+              <label for="f-description">Descrição <span class="req">*</span></label>
+              <textarea id="f-description" class="adm-input adm-textarea" rows="3" placeholder="1-2 frases descrevendo o projeto"></textarea>
+            </div>
+
+            <div class="adm-field">
+              <label for="f-tags">Tags <span class="req">*</span></label>
+              <input id="f-tags" class="adm-input" type="text" placeholder="React, Node.js, PostgreSQL" />
+              <span class="adm-hint">Separadas por vírgula</span>
+            </div>
+
+            <div class="adm-field">
+              <label for="f-github">GitHub <span class="req">*</span></label>
+              <input id="f-github" class="adm-input" type="url" placeholder="https://github.com/Luc555/projeto" />
+            </div>
+
+            <div class="adm-field">
+              <label for="f-live">Live demo</label>
+              <input id="f-live" class="adm-input" type="url" placeholder="https://meu-app.vercel.app (opcional)" />
+            </div>
+
+            <div class="adm-field">
+              <label for="f-folder">Pasta das fotos <span class="req">*</span></label>
+              <input id="f-folder" class="adm-input" type="text" placeholder="project-alpha" />
+              <span class="adm-hint">Nome da pasta em assets/images/projects/</span>
+            </div>
+
+            <div class="adm-field adm-field-full">
+              <label for="f-photos">Arquivos de foto</label>
+              <input id="f-photos" class="adm-input" type="text" placeholder="1.png, 2.png, 3.png" />
+              <span class="adm-hint">Nomes dos arquivos dentro da pasta, separados por vírgula</span>
+            </div>
+
+          </div>
+
+          <div class="adm-form-actions">
+            <button id="save-btn"   class="adm-btn-primary">Salvar projeto</button>
+            <button id="cancel-btn" class="adm-btn-ghost">Cancelar</button>
+            <span   id="save-status" class="adm-status"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTATOS -->
+      <section class="adm-section">
+        <div class="adm-section-header">
+          <h2 class="adm-section-title">Mensagens recebidas</h2>
+        </div>
+        <div id="contacts-list" class="adm-list"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/admin.js"></script>
+
+</body>
+</html>
