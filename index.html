@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucas Martins — Developer</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="noise"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <span class="nav-logo">LM<span class="dot">.</span></span>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="about">
+    <div class="hero-tag">Available for relocation</div>
+    <h1 class="hero-title">
+      <span class="line">Lucas</span>
+      <span class="line accent">Martins</span>
+    </h1>
+    <p class="hero-sub">
+      Full-stack developer based in Rio de Janeiro<br/>
+      building things that work, and look good doing it.
+    </p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn-primary">View projects</a>
+      <a href="https://github.com/Luc555" target="_blank" class="btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+    <div class="hero-scroll">scroll</div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <span>JavaScript</span><span class="sep">·</span>
+      <span>TypeScript</span><span class="sep">·</span>
+      <span>React</span><span class="sep">·</span>
+      <span>Node.js</span><span class="sep">·</span>
+      <span>Python</span><span class="sep">·</span>
+      <span>PostgreSQL</span><span class="sep">·</span>
+      <span>Docker</span><span class="sep">·</span>
+      <span>REST APIs</span><span class="sep">·</span>
+      <span>Git</span><span class="sep">·</span>
+      <span>Linux</span><span class="sep">·</span>
+      <span>JavaScript</span><span class="sep">·</span>
+      <span>TypeScript</span><span class="sep">·</span>
+      <span>React</span><span class="sep">·</span>
+      <span>Node.js</span><span class="sep">·</span>
+      <span>Python</span><span class="sep">·</span>
+      <span>PostgreSQL</span><span class="sep">·</span>
+      <span>Docker</span><span class="sep">·</span>
+      <span>REST APIs</span><span class="sep">·</span>
+      <span>Git</span><span class="sep">·</span>
+      <span>Linux</span><span class="sep">·</span>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <section class="projects" id="projects">
+    <div class="section-label">// projects</div>
+    <h2 class="section-title">What I've built</h2>
+    <div class="projects-grid" id="projects-grid">
+      <div class="empty-state">Carregando projetos…</div>
+    </div>
+  </section>
+
+  <!-- GALLERY LIGHTBOX -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <button class="modal-close" id="modal-close" aria-label="Fechar">&#x2715;</button>
+      <div class="modal-img-area">
+        <button class="modal-arrow" id="modal-prev" aria-label="Anterior">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <img id="modal-img" src="" alt="" />
+        <button class="modal-arrow" id="modal-next" aria-label="Próxima">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <span class="modal-img-count" id="modal-img-count"></span>
+      </div>
+      <div class="modal-dots" id="modal-dots"></div>
+      <div class="modal-info">
+        <div class="modal-info-text">
+          <h3 id="modal-title"></h3>
+          <p id="modal-desc"></p>
+        </div>
+        <div class="modal-links">
+          <a id="modal-repo" href="#" target="_blank" class="btn-primary">Ver no GitHub</a>
+          <a id="modal-live" href="#" target="_blank" class="btn-ghost" style="display:none">Live demo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="section-label">// contact</div>
+    <h2 class="section-title">Let's talk</h2>
+    <p class="contact-sub">Open to remote roles, relocation opportunities, and freelance projects.</p>
+    <form class="contact-form" id="contact-form" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5" placeholder="Tell me about the opportunity..." required></textarea>
+      </div>
+      <button type="submit" class="btn-primary" id="submit-btn">Send message</button>
+      <p class="form-status" id="form-status"></p>
+    </form>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>Lucas Martins © <span id="year"></span></span>
+    <div class="footer-links">
+      <a href="https://github.com/Luc555" target="_blank">GitHub</a>
+      <a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+    </div>
+  </footer>
+
+  <!-- config.js DEVE vir antes de main.js -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/main.js"></script>
+
+</body>
+</html>
