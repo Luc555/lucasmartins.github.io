@@ -2,22 +2,21 @@ name: Deploy portfolio
 
 on:
   push:
-    branches: [main]   # dispara a cada push na branch main
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # necessário para publicar no GitHub Pages
+      contents: write
 
     steps:
 
-      # 1. Baixa o código do repositório
+      # 1. Baixa o código
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Substitui os placeholders do config.template.js
-      #    pelos valores reais guardados nos GitHub Secrets
+      # 2. Injeta os secrets no config.js
       - name: Inject secrets into config.js
         env:
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
@@ -32,11 +31,16 @@ jobs:
             -e "s|__ADMIN_PASSWORD__|${ADMIN_PASSWORD}|g" \
             assets/js/config.template.js > assets/js/config.js
 
-      # 3. Publica tudo no GitHub Pages (branch gh-pages)
+      # 3. Remove config.js do .gitignore para o deploy incluir ele
+      - name: Allow config.js in deploy
+        run: |
+          sed -i '/assets\/js\/config\.js/d' .gitignore
+
+      # 4. Publica no GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./          # publica a raiz do projeto
+          publish_dir: ./
           publish_branch: gh-pages
           exclude_assets: '.github,assets/js/config.template.js'
